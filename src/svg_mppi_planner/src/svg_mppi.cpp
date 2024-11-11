@@ -34,6 +34,8 @@ SVGMPPI::SVGMPPI()
         prediction_horizon_ - 1, CONTROL_SPACE::dim
     );
 
+    local_cost_map_layer_name_ = "collision_layer";
+
     test();
 }
 
@@ -229,6 +231,7 @@ ControlSequence SVGMPPI::approximate_gradient_log_likelihood(
     auto cost_batch_ = calculate_state_cost_batch(
         initial_state,
         local_cost_map_,
+        local_cost_map_layer_name_,
         &state_sequence_batch_,
         noised_control_sequence_batch_
     ).first;
@@ -316,13 +319,16 @@ void SVGMPPI::random_sampling(
     }
 }
 
+
 std::pair<std::vector<double>, std::vector<double>> SVGMPPI::calculate_state_cost_batch(
     const State& initial_state,
     const grid_map::GridMap& local_cost_map,
-    StateSequenceBatch* state_sequence_batch,
+    const std::string& layer_name,
+    StateSequenceBatch* state_sequence_batch, 
     ControlSequenceBatch& control_sequence_batch
 ) const
-{
+{   
+    local_cost_map.get(layer_name);
     std::vector<double> total_cost_batch_(sample_number_);
     std::vector<double> collision_cost_batch_(sample_number_);
 
@@ -337,7 +343,8 @@ std::pair<std::vector<double>, std::vector<double>> SVGMPPI::calculate_state_cos
         // calculate state sequence cost
         const auto [total_cost_, collision_cost_] = calculate_state_sequence_cost(
             state_sequence_batch->at(i),
-            local_cost_map
+            local_cost_map,
+            layer_name
         );
         total_cost_batch_.at(i) = total_cost_;
         collision_cost_batch_.at(i) = collision_cost_;
@@ -345,6 +352,8 @@ std::pair<std::vector<double>, std::vector<double>> SVGMPPI::calculate_state_cos
 
     return std::make_pair(total_cost_batch_, collision_cost_batch_);
 }
+
+
 StateSequence SVGMPPI::predict_state_sequence(
     const State& initial_state,
     const ControlSequence& control_sequence
@@ -389,7 +398,8 @@ StateSequence SVGMPPI::predict_state_sequence(
 }
 std::pair<double, double> SVGMPPI::calculate_state_sequence_cost(
     const StateSequence state_sequence,
-    const grid_map::GridMap& local_cost_map
+    const grid_map::GridMap& local_cost_map,
+    const std::string& layer_name
 ) const
 {
     // total cost of summing stage cost and terminal cost

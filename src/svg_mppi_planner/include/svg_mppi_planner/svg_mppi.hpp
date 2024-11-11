@@ -4,6 +4,7 @@
 #include <random>
 #include <omp.h>
 #include <grid_map_core/GridMap.hpp>
+#include <algorithm>
 
 #include "svg_mppi_planner/common.hpp"
 
@@ -55,6 +56,7 @@ private:
 
     // local cost map
     grid_map::GridMap local_cost_map_;
+    std::string local_cost_map_layer_name_;
 
     // solve
     std::vector<double> costs_;
@@ -101,12 +103,17 @@ private:
     // to do 이진우
 
     /**
-     * @brief 모든 샘플에 대한 각각의 state cost를 계산한다.
+     * @brief 모든 샘플에 대한 각각의 state cost를 계산한다. >> 작업중 .. 
      * @param initial_state 초기 상태
+     * @param local_cost_map 로컬 cost mapd을 저장하는 grid map
+     * @param layer_name 로컬 cost map의 레이어 이름.
+     * @param state_sequence_batch state sequence들을 각각 행렬형태로 저장하고 그 행렬을 원소로 가지는 vector
+     * @param control_sequence_batch control sequence들을 각각 행렬형태로 저장하고 그 행렬을 원소로 가지는 vector
      */
     std::pair<std::vector<double>, std::vector<double>> calculate_state_cost_batch(
         const State& initial_state,
         const grid_map::GridMap& local_cost_map,
+        const std::string& layer_name,
         StateSequenceBatch* state_sequence_batch,
         ControlSequenceBatch& control_sequence_batch
     ) const;
@@ -131,7 +138,8 @@ private:
      */
     std::pair<double, double> calculate_state_sequence_cost(
         const StateSequence state_sequence,
-        const grid_map::GridMap& local_cost_map
+        const grid_map::GridMap& local_cost_map,
+        const std::string& layer_name
     ) const;
 
     // --------------------------------------------------------------------------------------------------------------------------------
