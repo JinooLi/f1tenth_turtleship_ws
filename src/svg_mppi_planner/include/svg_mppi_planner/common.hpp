@@ -45,7 +45,11 @@ namespace planning {
     using StateSequence = Eigen::MatrixXd;
     using ControlSequence = Eigen::MatrixXd;
 
+    // 각 원소가 Matrix인 Vector.
+    // 이때, Matrix는 각각의 column vector가 하나의 case에 포함되는 state들을 의미한다. 
     using StateSequenceBatch = std::vector<Eigen::MatrixXd, Eigen::aligned_allocator<Eigen::MatrixXd>>;
+    // 각 원소가 Matrix인 Vector.
+    // 이때, Matrix는 각각의 column vector가 하나의 case에 포함되는 control들을 의미한다.
     using ControlSequenceBatch = std::vector<Eigen::MatrixXd, Eigen::aligned_allocator<Eigen::MatrixXd>>;
 
     using ControlCovarianceSequence = std::vector<Eigen::MatrixXd, Eigen::aligned_allocator<Eigen::MatrixXd>>;
